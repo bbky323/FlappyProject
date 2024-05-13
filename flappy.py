@@ -12,6 +12,9 @@ BASEY        = SCREENHEIGHT * 0.79 # 바닥의 높이
 # image, sound and hitmask  dicts
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
+# 난이도에 따라 파이프의 수평 간격 조절
+ADDITIONAL_PIPE_SPACING = 50
+
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
     # red bird
@@ -204,13 +207,13 @@ def mainGame(movementInfo):
     # list of upper pipes
     upperPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[0]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + ADDITIONAL_PIPE_SPACING, 'y': newPipe2[0]['y']},
     ]
 
     # list of lowerpipe
     lowerPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[1]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + ADDITIONAL_PIPE_SPACING, 'y': newPipe2[1]['y']},
     ]
 
     # 게임 물리 및 환경 설정
@@ -291,10 +294,13 @@ def mainGame(movementInfo):
             lPipe['x'] += pipeVelX
 
         # add new pipe when first pipe is about to touch left of screen, 파이프 생성
-        if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5:
+        # if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5:
+        # 위의 기존의 조건에서 파이프의 간격을 늘림으로서 리스트에 최대 2개의 파이프가 있을때 새로운 파이프를 추가하는 조건을 삭제함
+        if len(upperPipes) > 0 and upperPipes[0]['x'] < 5:
             newPipe = getRandomPipe()
-            upperPipes.append(newPipe[0])
-            lowerPipes.append(newPipe[1])
+            newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + ADDITIONAL_PIPE_SPACING  # 수정된 간격 설정
+            upperPipes.append({'x': newPipeX, 'y': newPipe[0]['y']})
+            lowerPipes.append({'x': newPipeX, 'y': newPipe[1]['y']})
 
         # remove first pipe if its out of the screen, 파이프 제거
         if len(upperPipes) > 0 and upperPipes[0]['x'] < -IMAGES['pipe'][0].get_width():
