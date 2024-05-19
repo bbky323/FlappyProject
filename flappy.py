@@ -13,7 +13,9 @@ BASEY        = SCREENHEIGHT * 0.79 # 바닥의 높이
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
 # 난이도에 따라 파이프의 수평 간격 조절
-ADDITIONAL_PIPE_SPACING = 50
+EASY_PIPE_SPACING = 50
+HARD_PIPE_SPACING = 0
+pipeSpacing = EASY_PIPE_SPACING # 초기값을 easy로 설정
 
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
@@ -57,7 +59,7 @@ except NameError:
 
 
 def main():
-    global SCREEN, FPSCLOCK
+    global SCREEN, FPSCLOCK, pipeSpacing
     pygame.init() # Pygame 라이브러리 초기화
     FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
@@ -137,6 +139,7 @@ def main():
 
 def showWelcomeAnimation(): # 게임 시작 전 환영 화면
     """Shows welcome screen animation of flappy bird"""
+    global pipeSpacing
     # index of player to blit on screen
     playerIndex = 0
     playerIndexGen = cycle([0, 1, 2, 1]) # 새 날갯짓 순환
@@ -164,6 +167,22 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
+            #
+            if event.type == KEYDOWN and event.key == K_e:
+                pipeSpacing = EASY_PIPE_SPACING
+                return {
+                    'playery': playery + playerShmVals['val'],
+                    'basex': basex,
+                    'playerIndexGen': playerIndexGen,
+                }
+            if event.type == KEYDOWN and event.key == K_h:
+                pipeSpacing = HARD_PIPE_SPACING
+                return {
+                    'playery': playery + playerShmVals['val'],
+                    'basex': basex,
+                    'playerIndexGen': playerIndexGen,
+                }
+            
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
                 # make first flap sound and return values for mainGame
                 SOUNDS['wing'].play()
@@ -207,13 +226,13 @@ def mainGame(movementInfo):
     # list of upper pipes
     upperPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[0]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + ADDITIONAL_PIPE_SPACING, 'y': newPipe2[0]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + pipeSpacing, 'y': newPipe2[0]['y']},
     ]
 
     # list of lowerpipe
     lowerPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[1]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + ADDITIONAL_PIPE_SPACING, 'y': newPipe2[1]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + pipeSpacing, 'y': newPipe2[1]['y']},
     ]
 
     # 게임 물리 및 환경 설정
@@ -298,7 +317,7 @@ def mainGame(movementInfo):
         # 위의 기존의 조건에서 파이프의 간격을 늘림으로서 리스트에 최대 2개의 파이프가 있을때 새로운 파이프를 추가하는 조건을 삭제함
         if len(upperPipes) > 0 and upperPipes[0]['x'] < 5:
             newPipe = getRandomPipe()
-            newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + ADDITIONAL_PIPE_SPACING  # 수정된 간격 설정
+            newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + pipeSpacing  # 수정된 간격 설정
             upperPipes.append({'x': newPipeX, 'y': newPipe[0]['y']})
             lowerPipes.append({'x': newPipeX, 'y': newPipe[1]['y']})
 
