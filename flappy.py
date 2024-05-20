@@ -162,6 +162,11 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
     # player shm for up-down motion on welcome screen(상하 움직임 제어)
     playerShmVals = {'val': 0, 'dir': 1}
 
+    pygame.font.init()
+    font = pygame.font.Font(None, 18)
+    text_surface = font.render("Press 'E' for Easy mode, 'H' for Hard mode", True, (255, 255, 255)) #텍스트의 색상(rgb값 흰색으로 설정), 폰트 설정 
+    text_rect = text_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81)) #게임 시작화면의 난이도 설정 문구 위치 조정
+
     while True:
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -205,6 +210,8 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
                     (playerx, playery + playerShmVals['val']))
         SCREEN.blit(IMAGES['message'], (messagex, messagey))
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
+
+        SCREEN.blit(text_surface, text_rect) #텍스트의 정보 및 이미지를 게임화면에 나타냄
 
         # 변경된 사항 게임에 반영
         pygame.display.update()
