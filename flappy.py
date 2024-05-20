@@ -262,7 +262,7 @@ def mainGame(movementInfo):
             if pipeMidPos <= playerMidPos < pipeMidPos + 4: # 플레이어의 중심 위치가 파이프의 중심 위치를 통과했는지 확인
                 score += 1
                 SOUNDS['point'].play()
-                
+
         # playerIndex basex change
         if (loopIter + 1) % 3 == 0:
             playerIndex = next(playerIndexGen)
@@ -341,8 +341,10 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
 
     upperPipes, lowerPipes = crashInfo['upperPipes'], crashInfo['lowerPipes']
 
-    # play hit sound
+    # play hit and die sounds
     SOUNDS['hit'].play()
+    if not crashInfo['groundCrash']:
+        SOUNDS['die'].play()
 
     while True:
         for event in pygame.event.get():
@@ -363,11 +365,6 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
 
         # rotate only when it's a pipe crash
         if not crashInfo['groundCrash']:
-            # play die sound
-            if playerRot <= -30 and soundToggle == False:
-                    SOUNDS['die'].play()
-                    soundToggle = True
-            
             if playerRot > -90:
                 playerRot -= playerVelRot
 
@@ -458,7 +455,7 @@ def checkCrash(player, upperPipes, lowerPipes): # 새와 파이프가 충돌했
             uHitmask = HITMASKS['pipe'][0]
             lHitmask = HITMASKS['pipe'][1]
 
-            # if bird collided with upipe or lpipe 이건 부딪혔을 때 uCollide = 위파이프 lCollide = 아래파이프 true로 반환함
+            # if bird collided with upipe or lpipe
             uCollide = pixelCollision(playerRect, uPipeRect, pHitMask, uHitmask)
             lCollide = pixelCollision(playerRect, lPipeRect, pHitMask, lHitmask)
 
