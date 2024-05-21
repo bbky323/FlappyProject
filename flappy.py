@@ -362,18 +362,17 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
 
         # rotate only when it's a pipe crash
         if not crashInfo['groundCrash']:
-<<<<<<< HEAD
+
             if playerRot <= -30 and soundToggle == False:      #sound 출력 수정 부분(seunghun)
                     SOUNDS['die'].play()
                     soundToggle = True
                     
-=======
             # play die sound
             if playerRot <= -30 and soundToggle == False:   #사운드 수정사항, 새의 각도가 -30이하이고 soundToggle이 False일 때
                     SOUNDS['die'].play()
                     soundToggle = True                      #soundToggle은 True상태가 되며 다시 실행되기 전까지는 이 상태를 유지함
             
->>>>>>> seunghun
+
             if playerRot > -90:
                 playerRot -= playerVelRot
 
