@@ -335,6 +335,7 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
     playerAccY = 2
     playerRot = crashInfo['playerRot']
     playerVelRot = 7
+    soundToggle = False             # whlie True에서 die sound를 한 번만 출력하기 위한 토글 변수 생성
 
     basex = crashInfo['basex']
 
