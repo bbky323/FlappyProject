@@ -437,7 +437,7 @@ def showScore(score):
         Xoffset += IMAGES['numbers'][digit].get_width()
 
 
-def checkCrash(player, upperPipes, lowerPipes): # 새와 파이프가 충돌했
+def checkCrash(player, upperPipes, lowerPipes): # 새와 파이프가 충돌했을 때
     """returns True if player collides with base or pipes."""
     pi = player['index']
     player['w'] = IMAGES['player'][0].get_width()
