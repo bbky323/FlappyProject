@@ -491,3 +491,5 @@ def getHitmask(image): #이미지와 겹쳤을 때 충돌
 
 if __name__ == '__main__':
     main()
+
+# 테스트 한 번 해볼게요
