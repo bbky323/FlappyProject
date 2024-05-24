@@ -341,16 +341,9 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
 
     upperPipes, lowerPipes = crashInfo['upperPipes'], crashInfo['lowerPipes']
 
-<<<<<<< HEAD
     # play hit and die sounds -> hit
     SOUNDS['hit'].play()
-=======
-    # play hit and die sounds
-    SOUNDS['hit'].play()
-    if not crashInfo['groundCrash']:
-        SOUNDS['die'].play()
 
->>>>>>> 5787132e344f8e0f7bc4feac135874a6c78a6251
     while True:
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -370,20 +363,13 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
 
         # rotate only when it's a pipe crash
         if not crashInfo['groundCrash']:
-<<<<<<< HEAD
 
-            if playerRot <= -30 and soundToggle == False:      #sound 출력 수정 부분(seunghun)
-                    SOUNDS['die'].play()
-                    soundToggle = True
                     
             # this play die sound
             if playerRot <= -30 and soundToggle == False:   #사운드 수정사항, 새의 각도가 -30이하이고 soundToggle이 False일 때
                     SOUNDS['die'].play()
                     soundToggle = True                      #soundToggle은 True상태가 되며 다시 실행되기 전까지는 이 상태를 유지함
             
-
-=======
->>>>>>> 5787132e344f8e0f7bc4feac135874a6c78a6251
             if playerRot > -90:
                 playerRot -= playerVelRot
 
@@ -398,8 +384,6 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
         showScore(score)
 
         
-
-
         playerSurface = pygame.transform.rotate(IMAGES['player'][1], playerRot)
         SCREEN.blit(playerSurface, (playerx,playery))
         SCREEN.blit(IMAGES['gameover'], (50, 180))
@@ -448,11 +432,8 @@ def showScore(score):
         Xoffset += IMAGES['numbers'][digit].get_width()
 
 
-<<<<<<< HEAD
 def checkCrash(player, upperPipes, lowerPipes): # 새와 파이프가 충돌했을 때
-=======
-def checkCrash(player, upperPipes, lowerPipes): # 새와 파이프가 충돌했
->>>>>>> 5787132e344f8e0f7bc4feac135874a6c78a6251
+
     """returns True if player collides with base or pipes."""
     pi = player['index']
     player['w'] = IMAGES['player'][0].get_width()
