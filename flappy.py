@@ -350,8 +350,6 @@ def mainGame(movementInfo):
             lPipe['x'] += pipeVelX
 
         # add new pipe when first pipe is about to touch left of screen, 파이프 생성
-        # if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5: (준영)
-        # 위의 기존의 조건에서 파이프의 간격을 늘림으로서 리스트에 최대 2개의 파이프가 있을때 새로운 파이프를 추가하는 조건을 삭제함
         if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5:
             newPipe = getRandomPipe()
             newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + pipeSpacing  # 수정된 간격 설정
