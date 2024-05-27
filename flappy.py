@@ -169,15 +169,15 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
     pygame.font.init()
     font = pygame.font.Font(None, 18)
     text = "Press 'E' for Easy mode, 'H' for Hard mode"
-    shadow_color = (0, 0, 0)  # 검정색 그림자
-    text_color = (255, 255, 255)  # 흰색 텍스트
+    shadow_color = (0, 0, 0)  # 검정색 그림자 생성
+    text_color = (255, 255, 255)  # 흰색 텍스트 설정
     shadow_offset = 2  # 그림자의 오프셋
 
-    # 그림자 텍스트 생성
+    # 그림자 텍스트 생성, 위치 설정
     shadow_surface = font.render(text, True, shadow_color)
     shadow_rect = shadow_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81 + shadow_offset))
 
-    # 실제 텍스트 생성
+    # 실제 텍스트 생성, 위치 설정
     text_surface = font.render(text, True, text_color)
     text_rect = text_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81))
 
@@ -352,7 +352,7 @@ def mainGame(movementInfo):
         # add new pipe when first pipe is about to touch left of screen, 파이프 생성
         # if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5: (준영)
         # 위의 기존의 조건에서 파이프의 간격을 늘림으로서 리스트에 최대 2개의 파이프가 있을때 새로운 파이프를 추가하는 조건을 삭제함
-        if len(upperPipes) > 0 and upperPipes[0]['x'] < 5:
+        if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5:
             newPipe = getRandomPipe()
             newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + pipeSpacing  # 수정된 간격 설정
             upperPipes.append({'x': newPipeX, 'y': newPipe[0]['y']})
