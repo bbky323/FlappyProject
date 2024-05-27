@@ -12,7 +12,7 @@ BASEY        = SCREENHEIGHT * 0.79 # 바닥의 높이
 # image, sound and hitmask  dicts
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
-# 난이도에 따라 파이프의 수평 간격 조절
+# 난이도에 따라 파이프의 수평 간격 조절 (준영)
 EASY_PIPE_SPACING = 50
 HARD_PIPE_SPACING = 0
 pipeSpacing = EASY_PIPE_SPACING # 초기값을 easy로 설정
@@ -167,25 +167,25 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
     # player shm for up-down motion on welcome screen(상하 움직임 제어)
     playerShmVals = {'val': 0, 'dir': 1}
 
-    pygame.font.init()
+    pygame.font.init() # 난이도 설정하는 문구 표시 (준영)
     font = pygame.font.Font(None, 18)
-    text_surface = font.render("Press 'E' for Easy mode, 'H' for Hard mode", True, (255, 255, 255)) #텍스트의 색상(rgb값 흰색으로 설정), 폰트 설정 
-    text_rect = text_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81)) #게임 시작화면의 난이도 설정 문구 위치 조정
+    text_surface = font.render("Press 'E' for Easy mode, 'H' for Hard mode", True, (255, 255, 255)) # 텍스트의 색상(rgb값 흰색으로 설정), 폰트 설정
+    text_rect = text_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81)) # 게임 시작화면의 난이도 설정 문구 위치 조정
 
     while True:
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-            #
-            if event.type == KEYDOWN and event.key == K_e:
+            
+            if event.type == KEYDOWN and event.key == K_e: # e key를 누르면 easy mode 로 게임 시작 (준영)
                 pipeSpacing = EASY_PIPE_SPACING
                 return {
                     'playery': playery + playerShmVals['val'],
                     'basex': basex,
                     'playerIndexGen': playerIndexGen,
                 }
-            if event.type == KEYDOWN and event.key == K_h:
+            if event.type == KEYDOWN and event.key == K_h: # h key를 누르면 hard mode로 게임 시작
                 pipeSpacing = HARD_PIPE_SPACING
                 return {
                     'playery': playery + playerShmVals['val'],
@@ -233,7 +233,7 @@ def mainGame(movementInfo):
 
     # get 2 new pipes to add to upperPipes lowerPipes list
     newPipe1 = getRandomPipe()
-    newPipe2 = getRandomPipe() 
+    newPipe2 = getRandomPipe()
 
     # list of upper pipes
     upperPipes = [
@@ -337,7 +337,7 @@ def mainGame(movementInfo):
             lPipe['x'] += pipeVelX
 
         # add new pipe when first pipe is about to touch left of screen, 파이프 생성
-        # if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5:
+        # if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5: (준영)
         # 위의 기존의 조건에서 파이프의 간격을 늘림으로서 리스트에 최대 2개의 파이프가 있을때 새로운 파이프를 추가하는 조건을 삭제함
         if len(upperPipes) > 0 and upperPipes[0]['x'] < 5:
             newPipe = getRandomPipe()
@@ -476,14 +476,16 @@ def playerShm(playerShm):
 
 
 def getRandomPipe():
+    """returns a randomly generated pipe"""
+    # y of gap between upper and lower pipe
     gapY = random.randrange(0, int(BASEY * 0.6 - PIPEGAPSIZE))
     gapY += int(BASEY * 0.2)
     pipeHeight = IMAGES['pipe'][0].get_height()
     pipeX = SCREENWIDTH + 10
 
     return [
-        {'x': pipeX, 'y': gapY - pipeHeight},
-        {'x': pipeX, 'y': gapY + PIPEGAPSIZE},
+        {'x': pipeX, 'y': gapY - pipeHeight},  # upper pipe
+        {'x': pipeX, 'y': gapY + PIPEGAPSIZE}, # lower pipe
     ]
 
 
