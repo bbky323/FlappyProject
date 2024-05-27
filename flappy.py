@@ -59,7 +59,7 @@ except NameError:
 
 
 def main():
-    global SCREEN, FPSCLOCK, pipeSpacing
+    global SCREEN, FPSCLOCK, pipeSpacing # 전역함수 설정(준영)
     pygame.init() # Pygame 라이브러리 초기화
     FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
@@ -85,11 +85,6 @@ def main():
     IMAGES['message'] = pygame.image.load('assets/sprites/message.png').convert_alpha()
     # base (ground) sprite
     IMAGES['base'] = pygame.image.load('assets/sprites/base.png').convert_alpha()
-    #별모양 아이템 이미지 추가함(기영)
-    item_image = pygame.image.load('assets/sprites/star.png').convert_alpha()
-    item_size = (item_image.get_width() // 8, item_image.get_height() // 8)  # 이미지 크기 조절
-    IMAGES['item'] = pygame.transform.scale(item_image, item_size)
-    
 
     # sounds, 윈도우인경우 wav, 그 외엔 ogg
     if 'win' in sys.platform:
@@ -247,10 +242,6 @@ def mainGame(movementInfo):
         {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + pipeSpacing, 'y': newPipe2[1]['y']},
     ]
 
-    # 아이템 생성하는 코드, 아이템 생성 확률은 20%(기영)
-    item = None
-    item_spawn_chance = 0.2
-
     # 게임 물리 및 환경 설정
     dt = FPSCLOCK.tick(FPS)/1000
     pipeVelX = -128 * dt
@@ -292,12 +283,6 @@ def mainGame(movementInfo):
                 'playerVelY': playerVelY,
                 'playerRot': playerRot
             }
-        
-        # 아이템 충돌 확인 함수 추가(기영)
-        if item and checkItemCollision({'x': playerx, 'y': playery, 'index': playerIndex}, item):
-            score += 1
-            SOUNDS['point'].play()
-            item = None
 
         # check for score
         playerMidPos = playerx + IMAGES['player'][0].get_width() / 2
@@ -306,8 +291,6 @@ def mainGame(movementInfo):
             if pipeMidPos <= playerMidPos < pipeMidPos + 4: # 플레이어의 중심 위치가 파이프의 중심 위치를 통과했는지 확인
                 score += 1
                 SOUNDS['point'].play()
-                if random.random() < item_spawn_chance: #확률 로직 추가(기영)
-                    item = getRandomItem(lowerPipes, upperPipes, playerx)
 
         # playerIndex basex change
         if (loopIter + 1) % 3 == 0:
@@ -368,14 +351,6 @@ def mainGame(movementInfo):
         
         playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], visibleRot)
         SCREEN.blit(playerSurface, (playerx, playery))
-
-        # 아이템 그리기 추가(기영)
-        if item:
-            item['x'] += pipeVelX
-            if item['x'] < -IMAGES['item'].get_width():
-                item = None
-            else:
-                SCREEN.blit(IMAGES['item'], (item['x'], item['y']))
 
         # 화면 업데이트 및 프레임 속도 조절
         pygame.display.update()
@@ -447,21 +422,6 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
 
         FPSCLOCK.tick(FPS)
         pygame.display.update()
-
-# 아이템을 생성하는 함수 추가(기영)
-def getRandomItem(lowerPipes, upperPipes, playerx):
-    """returns a randomly generated item between the pipes"""
-    # Choose a random pipe pair
-    pipe_idx = random.randint(0, len(lowerPipes) - 1)
-    lowerPipe = lowerPipes[pipe_idx]
-    upperPipe = upperPipes[pipe_idx]
-    
-    # Generate an item between the pipes
-    itemX = max(lowerPipe['x'], playerx + 50) + 50 # 항상 아이템을 캐릭터보다 앞에, 파이프 사이에 위치
-    itemY = random.randint(upperPipe['y'] + IMAGES['pipe'][0].get_height() + PIPEGAPSIZE / 2,
-                           lowerPipe['y'] - PIPEGAPSIZE / 2)  # y좌표는 항상 위 파이프와 아래 파이프 사이에 나오도록 설정
-    
-    return {'x': itemX, 'y': itemY}
 
 
 def playerShm(playerShm):
@@ -564,13 +524,6 @@ def getHitmask(image): #이미지와 겹쳤을 때 충돌
         for y in xrange(image.get_height()):
             mask[x].append(bool(image.get_at((x,y))[3]))
     return mask
-
-#아이템과 캐릭터가 충돌하는지 확인하는 함수 추가(기영)
-def checkItemCollision(player, item):
-    playerRect = pygame.Rect(player['x'], player['y'], IMAGES['player'][0].get_width(), IMAGES['player'][0].get_height())
-    itemRect = pygame.Rect(item['x'], item['y'], IMAGES['item'].get_width(), IMAGES['item'].get_height())
-    return playerRect.colliderect(itemRect)
-
 
 if __name__ == '__main__':
     main()
