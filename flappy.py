@@ -497,8 +497,8 @@ def getRandomItem(lowerPipes, upperPipes, playerx):
     
     # Generate an item between the pipes
     itemX = max(lowerPipe['x'], playerx + 50) + 50 # 항상 아이템을 캐릭터보다 앞에, 파이프 사이에 위치
-    itemY = random.randint(upperPipe['y'] + IMAGES['pipe'][0].get_height() + PIPEGAPSIZE / 2,
-                           lowerPipe['y'] - PIPEGAPSIZE / 2)  # y좌표는 항상 위 파이프와 아래 파이프 사이에 나오도록 설정
+    itemY = random.randint(int(upperPipe['y'] + IMAGES['pipe'][0].get_height() + PIPEGAPSIZE / 2),
+                           int(lowerPipe['y'] - PIPEGAPSIZE / 2))  # y좌표는 항상 위 파이프와 아래 파이프 사이에 나오도록 설정
     
     return {'x': itemX, 'y': itemY}
 
