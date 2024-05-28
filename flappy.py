@@ -666,9 +666,9 @@ def selectCharacter():
     while not selected:
         #캐릭터 선택 텍스트 표시 
         font = pygame.font.Font(None, 36)
-        title_text = font.render('Select Character', True, (255, 255, 255)) #텍스트 생성 
-        title_rect = title_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 6)) #텍스트 위치 설정
-        SCREEN.blit(title_text, title_rect) #화면에 텍스트 표시
+        title_text = font.render('Select Character', True, (255, 255, 255)) 
+        title_rect = title_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 6)) 
+        SCREEN.blit(title_text, title_rect) 
 
         #화면에 표시할 player 이미지들
         character_images = [pygame.image.load(PLAYERS_LIST[0][1]).convert_alpha(),
