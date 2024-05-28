@@ -59,7 +59,7 @@ except NameError:
 
 
 def main():
-    global SCREEN, FPSCLOCK, pipeSpacing # 전역함수 설정(준영)
+    global SCREEN, FPSCLOCK#, pipeSpacing # 전역함수 설정(준영)
     pygame.init() # Pygame 라이브러리 초기화
     FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
@@ -189,6 +189,8 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
             
             if event.type == KEYDOWN and event.key == K_e: # e key를 누르면 easy mode 로 게임 시작 (준영)
                 pipeSpacing = EASY_PIPE_SPACING
+                # make first flap sound and return values for mainGame
+                SOUNDS['wing'].play()
                 return {
                     'playery': playery + playerShmVals['val'],
                     'basex': basex,
@@ -196,13 +198,6 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
                 }
             if event.type == KEYDOWN and event.key == K_h: # h key를 누르면 hard mode로 게임 시작
                 pipeSpacing = HARD_PIPE_SPACING
-                return {
-                    'playery': playery + playerShmVals['val'],
-                    'basex': basex,
-                    'playerIndexGen': playerIndexGen,
-                }
-            
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
                 # make first flap sound and return values for mainGame
                 SOUNDS['wing'].play()
                 return {
