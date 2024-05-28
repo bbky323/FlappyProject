@@ -89,6 +89,10 @@ def main():
     item_image = pygame.image.load('assets/sprites/star.png').convert_alpha()
     item_size = (item_image.get_width() // 8, item_image.get_height() // 8)  # 이미지 크기 조절
     IMAGES['item'] = pygame.transform.scale(item_image, item_size)
+    #생명모양 하트 이미지 추가(영섭)
+    IMAGES['life'] = pygame.image.load('assets/sprites/life.png').convert_alpha()
+    IMAGES['modilife'] = pygame.transform.scale(IMAGES['life'], (20, 20)) 
+
     # sounds, 윈도우인경우 wav, 그 외엔 ogg
     if 'win' in sys.platform:
         soundExt = '.wav'
@@ -274,7 +278,13 @@ def mainGame(movementInfo):
     playerRotThr  =  20   # rotation threshold
     playerFlapAcc =  -9   # players speed on flapping
     playerFlapped = False # True when player flaps
-
+    #목숨 추가, 무적 상태와 시간, 깜빡거림 상태와 빈도 프레임 단위(영섭)
+    playerLives         =   3   
+    invincible          = False 
+    blink_visible       = True                                                                    
+    invincible_duration =   30                                                                
+    blink_frequency     =   3                                                                    
+      
 
     while True:
         for event in pygame.event.get():# 게임 종료 이벤트
@@ -288,9 +298,26 @@ def mainGame(movementInfo):
                     SOUNDS['wing'].play()
 
         # check for crash here 충돌 검사
-        crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
+        if not invincible:    #무적이 아닌경우 충돌 무시(영섭)
+            crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},        
                                upperPipes, lowerPipes)
-        if crashTest[0]:
+            if crashTest[0]:            #충돌 시 (영섭)     
+                SOUNDS['hit'].play()    #충돌 소리 발생
+                playerLives -= 1        #목숨 감소
+                invincible = True       #무적 상태 활성화                              
+
+        else :
+            if invincible_duration % blink_frequency == 0:         #무적기간 / 무적빈도 의 값이 0일때만(영섭)
+                blink_visible = not blink_visible                  #not blink_visible으로 정의함으로써 true일땐 flase , false일땐 true로 변하여 밑의 조건문의 조건에 걸려서 깜빡거리도록함
+
+            invincible_duration -= 1                               #프레임마다 while문이 한번 씩 돌고 이때마다 1씩 감소
+            
+            if invincible_duration <= 0:                           #만약 남은 무적시간이 0보다 작다면 
+                invincible = False                                 #설정 값들 초기화(무적 해제, 무적시간 초기화, 깜빡거림 초기화)
+                invincible_duration = 30
+                blink_visible = True
+
+        if playerLives == 0:    #목숨이 0개라면 종료(영섭)
             return {
                 'y': playery,
                 'groundCrash': crashTest[1],
@@ -373,9 +400,10 @@ def mainGame(movementInfo):
         visibleRot = playerRotThr
         if playerRot <= playerRotThr:
             visibleRot = playerRot
-        
-        playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], visibleRot)
-        SCREEN.blit(playerSurface, (playerx, playery))
+        #blink_visible 상태라면 이미지가 나타나지않도록 하는 조건문(영섭)
+        if blink_visible : 
+            playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], visibleRot)
+            SCREEN.blit(playerSurface, (playerx, playery))
 
         # 아이템 그리기 추가(기영)
         if item:
@@ -384,6 +412,9 @@ def mainGame(movementInfo):
                 item = None
             else:
                 SCREEN.blit(IMAGES['item'], (item['x'], item['y']))
+
+        #목숨 개수 표시(영섭)
+        ShowplayerLives(playerLives)
 
         # 화면 업데이트 및 프레임 속도 조절
         pygame.display.update()
@@ -467,8 +498,8 @@ def getRandomItem(lowerPipes, upperPipes, playerx):
     
     # Generate an item between the pipes
     itemX = max(lowerPipe['x'], playerx + 50) + 50 # 항상 아이템을 캐릭터보다 앞에, 파이프 사이에 위치
-    itemY = random.randint(upperPipe['y'] + IMAGES['pipe'][0].get_height() + PIPEGAPSIZE / 2,
-                           lowerPipe['y'] - PIPEGAPSIZE / 2)  # y좌표는 항상 위 파이프와 아래 파이프 사이에 나오도록 설정
+    itemY = random.randint(int(upperPipe['y'] + IMAGES['pipe'][0].get_height() + PIPEGAPSIZE / 2),
+                           int(lowerPipe['y'] - PIPEGAPSIZE / 2))  # y좌표는 항상 위 파이프와 아래 파이프 사이에 나오도록 설정
     
     return {'x': itemX, 'y': itemY}
 
@@ -578,6 +609,11 @@ def checkItemCollision(player, item):
     playerRect = pygame.Rect(player['x'], player['y'], IMAGES['player'][0].get_width(), IMAGES['player'][0].get_height())
     itemRect = pygame.Rect(item['x'], item['y'], IMAGES['item'].get_width(), IMAGES['item'].get_height())
     return playerRect.colliderect(itemRect)
+
+#목숨의 개수를 보여주는 함수 추가(영섭)
+def ShowplayerLives(playerLives):      
+    for i in range(playerLives):                                                        
+        SCREEN.blit(IMAGES['modilife'],(10+i*25,10))   
 
 #배경 선택 함수 추가(해령)
 def selectBackground():
