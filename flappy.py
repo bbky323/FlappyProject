@@ -89,6 +89,10 @@ def main():
     item_image = pygame.image.load('assets/sprites/star.png').convert_alpha()
     item_size = (item_image.get_width() // 8, item_image.get_height() // 8)  # 이미지 크기 조절
     IMAGES['item'] = pygame.transform.scale(item_image, item_size)
+    #생명모양 하트 이미지 추가(영섭)
+    IMAGES['life'] = pygame.image.load('assets/sprites/life.png').convert_alpha()
+    IMAGES['modilife'] = pygame.transform.scale(IMAGES['life'], (20, 20)) 
+    
     # sounds, 윈도우인경우 wav, 그 외엔 ogg
     if 'win' in sys.platform:
         soundExt = '.wav'
