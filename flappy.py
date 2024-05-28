@@ -273,7 +273,8 @@ def mainGame(movementInfo):
     playerRotThr  =  20   # rotation threshold
     playerFlapAcc =  -9   # players speed on flapping
     playerFlapped = False # True when player flaps
-
+    #목숨 추가(영섭)
+    playerLives   =   3
 
     while True:
         for event in pygame.event.get():# 게임 종료 이벤트
@@ -383,6 +384,9 @@ def mainGame(movementInfo):
                 item = None
             else:
                 SCREEN.blit(IMAGES['item'], (item['x'], item['y']))
+
+        #목숨 개수 표시(영섭)
+        ShowplayerLives(playerLives)
 
         # 화면 업데이트 및 프레임 속도 조절
         pygame.display.update()
@@ -577,6 +581,11 @@ def checkItemCollision(player, item):
     playerRect = pygame.Rect(player['x'], player['y'], IMAGES['player'][0].get_width(), IMAGES['player'][0].get_height())
     itemRect = pygame.Rect(item['x'], item['y'], IMAGES['item'].get_width(), IMAGES['item'].get_height())
     return playerRect.colliderect(itemRect)
+
+#목숨의 개수를 보여주는 함수 추가(영섭)
+def ShowplayerLives(playerLives):      
+    for i in range(playerLives):                                                        
+        SCREEN.blit(IMAGES['modilife'],(10+i*25,10))   
 
 if __name__ == '__main__':
     main()
