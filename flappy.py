@@ -59,7 +59,7 @@ except NameError:
 
 
 def main():
-    global SCREEN, FPSCLOCK#, pipeSpacing # 전역함수 설정(준영)
+    global SCREEN, FPSCLOCK
     pygame.init() # Pygame 라이브러리 초기화
     FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
