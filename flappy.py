@@ -308,15 +308,16 @@ def mainGame(movementInfo):
             item = None
 
         # check for score
-        playerMidPos = playerx + IMAGES['player'][0].get_width() / 2
+        playerMidPos = playerx + IMAGES['player'][0].get_width() / 2 # 캐릭터의 중앙 위치 계산
         for pipe in upperPipes:
-            pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2
-            if pipeMidPos <= playerMidPos < pipeMidPos + 4: # 플레이어의 중심 위치가 파이프의 중심 위치를 통과했는지 확인
-                score += 1
+            pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2 # 파이프의 중앙 위치 계산
+            if pipeMidPos < playerMidPos and not pipe.get('scored', False): # 캐릭터가 파이프의 중심을 지났는지 체크, 해당 파이프를 통과했을때 점수를 계산했는지 체크.
+                score += 1 #위 조건을 모두 만족할때 점수를 1 올림
+                pipe['scored'] = True  # 점수가 계산되면 True로 설정, 해당 파이프에 대해 점수가 계산되는 것 방지
                 SOUNDS['point'].play()
                 if random.random() < item_spawn_chance: #확률 로직 추가(기영)
                     item = getRandomItem(lowerPipes, upperPipes, playerx)
-
+ 
         # playerIndex basex change
         if (loopIter + 1) % 3 == 0:
             playerIndex = next(playerIndexGen)
@@ -345,10 +346,10 @@ def mainGame(movementInfo):
             lPipe['x'] += pipeVelX
 
         # add new pipe when first pipe is about to touch left of screen, 파이프 생성
-        if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5:
+        if 0 < len(upperPipes) and upperPipes[-1]['x'] < SCREENWIDTH - (SCREENWIDTH / 2 + pipeSpacing): # 파이프 개수에 상관 없이 마지막 파이프가 화면 중간을 넘어설때 새 파이프 추가
             newPipe = getRandomPipe()
-            newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + pipeSpacing  # 수정된 간격 설정
-            upperPipes.append({'x': newPipeX, 'y': newPipe[0]['y']})
+            newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + pipeSpacing
+            upperPipes.append({'x': newPipeX, 'y': newPipe[0]['y'], 'scored': False})  # 새 파이프에 scored : False 속성 추가. 캐릭터가 해당 파이프를 지나게 될때 점수를 체크 하고 True로 변환
             lowerPipes.append({'x': newPipeX, 'y': newPipe[1]['y']})
 
         # remove first pipe if its out of the screen, 파이프 제거
