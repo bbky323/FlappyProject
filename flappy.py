@@ -175,7 +175,7 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
 
     # 그림자 텍스트 생성, 위치 설정
     shadow_surface = font.render(text, True, shadow_color)
-    shadow_rect = shadow_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81 + shadow_offset))
+    shadow_rect = shadow_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81 + shadow_offset)) #글씨가 잘 안보이면 0.77로 수정 가능
 
     # 실제 텍스트 생성, 위치 설정
     text_surface = font.render(text, True, text_color)
@@ -188,18 +188,18 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
                 sys.exit()
             
             if event.type == KEYDOWN and event.key == K_e: # e key를 누르면 easy mode 로 게임 시작 (준영)
-                pipeSpacing = EASY_PIPE_SPACING
                 # make first flap sound and return values for mainGame
                 SOUNDS['wing'].play()
+                pipeSpacing = EASY_PIPE_SPACING
                 return {
                     'playery': playery + playerShmVals['val'],
                     'basex': basex,
                     'playerIndexGen': playerIndexGen,
                 }
             if event.type == KEYDOWN and event.key == K_h: # h key를 누르면 hard mode로 게임 시작
-                pipeSpacing = HARD_PIPE_SPACING
                 # make first flap sound and return values for mainGame
                 SOUNDS['wing'].play()
+                pipeSpacing = HARD_PIPE_SPACING
                 return {
                     'playery': playery + playerShmVals['val'],
                     'basex': basex,
