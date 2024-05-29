@@ -1,8 +1,11 @@
 from itertools import cycle # 반복 가능하게, 예를 들면 새의 날갯짓
 import random
+import time # 시간 측정을 위해 사용(승훈)
 import sys # 게임 종료 시킬 때 사용
 import pygame
 from pygame.locals import * # pygame 사용 시 입력 및 이벤트 관리
+
+
 
 FPS = 30 # 게임의 프레임 설정
 SCREENWIDTH  = 288 # 화면 너비
@@ -59,11 +62,12 @@ except NameError:
 
 
 def main():
-    global SCREEN, FPSCLOCK
+    global SCREEN, FPSCLOCK, startTime      #시작시간 측정을 위한 전역변수 선언 (승훈)
     pygame.init() # Pygame 라이브러리 초기화
     FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
     pygame.display.set_caption('Flappy Bird') # 게임 창의 상단에 표시될 제목
+    
 
     # numbers sprites for score display, convert_alpha()를 사용하여 이미지 객체로 변환, 투명도 관리
     IMAGES['numbers'] = (
@@ -92,6 +96,10 @@ def main():
     #생명모양 하트 이미지 추가(영섭)
     IMAGES['life'] = pygame.image.load('assets/sprites/life.png').convert_alpha()
     IMAGES['modilife'] = pygame.transform.scale(IMAGES['life'], (20, 20)) 
+    #콜론 이미지 추가 (승훈)
+    colon_image = pygame.image.load('assets/sprites/colon.png').convert_alpha()
+    colon_size = (colon_image.get_width() // 2, colon_image.get_height() // 3.5)
+    IMAGES['colon'] = pygame.transform.scale(colon_image, colon_size)
 
     # sounds, 윈도우인경우 wav, 그 외엔 ogg
     if 'win' in sys.platform:
@@ -139,6 +147,8 @@ def main():
             getHitmask(IMAGES['player'][1]),
             getHitmask(IMAGES['player'][2]),
         )
+        
+        startTime = time.time()
 
         movementInfo = showWelcomeAnimation()
         crashInfo = mainGame(movementInfo)
@@ -440,6 +450,9 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
     # play hit and die sounds -> hit
     SOUNDS['hit'].play()
 
+    # 게임 시간 출력
+    playTime = time.time() - startTime  #시작부터 게임 오버까지 플레이한 시간을 저장함 (승훈)
+
     while True:
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -460,8 +473,7 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
         # rotate only when it's a pipe crash
         if not crashInfo['groundCrash']:
 
-                    
-            # this play die sound
+            # this play die sound / 'die' 출력 부분 수정 if문 (승훈)
             if playerRot <= -30 and soundToggle == False:   #사운드 수정사항, 새의 각도가 -30이하이고 soundToggle이 False일 때
                     SOUNDS['die'].play()
                     soundToggle = True                      #soundToggle은 True상태가 되며 다시 실행되기 전까지는 이 상태를 유지함
@@ -479,7 +491,7 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
         showScore(score)
 
-        
+        playTimecheck(playTime)          #게임 오버시 시간 출력해주는 함수 (승훈)
         playerSurface = pygame.transform.rotate(IMAGES['player'][1], playerRot)
         SCREEN.blit(playerSurface, (playerx,playery))
         SCREEN.blit(IMAGES['gameover'], (50, 180))
@@ -502,6 +514,27 @@ def getRandomItem(lowerPipes, upperPipes, playerx):
                            int(lowerPipe['y'] - PIPEGAPSIZE / 2))  # y좌표는 항상 위 파이프와 아래 파이프 사이에 나오도록 설정
     
     return {'x': itemX, 'y': itemY}
+
+#플레이 시간 출력해주는 함수 (승훈)
+def playTimecheck(playTime):                            # 'MM' 'SS'로 출력하기 위해 리스트에 시간값을 다 분해함
+    timeArr = [
+        int((playTime // 60) // 10), 
+        int((playTime // 60) % 10), 
+        int((playTime % 60) // 10), 
+        int((playTime % 60) % 10)
+    ]
+
+    x_offset = SCREENWIDTH // 2 - 75                                    #x위치 최적 75
+    y_offset = SCREENHEIGHT // 2 - 20                                   #y위치 최적 20
+    
+    for coln, seg in enumerate(timeArr):                                #인덱스랑 값을 같이 가져옴
+        if coln == 2:
+            SCREEN.blit(IMAGES['colon'], (x_offset, y_offset + 3))      #콜론 출력
+            x_offset += int(IMAGES['colon'].get_width()) + 10
+        
+        SCREEN.blit(IMAGES['numbers'][seg], (x_offset, y_offset))
+        x_offset += int(IMAGES['numbers'][seg].get_width()) + 10   
+
 
 def playerShm(playerShm):
     """oscillates the value of playerShm['val'] between 8 and -8"""
