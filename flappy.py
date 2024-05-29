@@ -114,16 +114,17 @@ def main():
     SOUNDS['wing']   = pygame.mixer.Sound('assets/audio/wing' + soundExt)
 
     while True:
-        # select random background sprites
-        randBg = random.randint(0, len(BACKGROUNDS_LIST) - 1)
-        IMAGES['background'] = pygame.image.load(BACKGROUNDS_LIST[randBg]).convert()
+        # select background sprites
+        inputBackground = selectBackground()
+        IMAGES['background'] = pygame.image.load(BACKGROUNDS_LIST[inputBackground]).convert()
+        SCREEN.blit(IMAGES['background'], (0,0))
 
-        # select random player sprites
-        randPlayer = random.randint(0, len(PLAYERS_LIST) - 1)
+        # select player sprites
+        inputPlayer = selectPlayer()
         IMAGES['player'] = (
-            pygame.image.load(PLAYERS_LIST[randPlayer][0]).convert_alpha(),
-            pygame.image.load(PLAYERS_LIST[randPlayer][1]).convert_alpha(),
-            pygame.image.load(PLAYERS_LIST[randPlayer][2]).convert_alpha(),
+            pygame.image.load(PLAYERS_LIST[inputPlayer][0]).convert_alpha(),
+            pygame.image.load(PLAYERS_LIST[inputPlayer][1]).convert_alpha(),
+            pygame.image.load(PLAYERS_LIST[inputPlayer][2]).convert_alpha(),
         )
 
         # select random pipe sprites
@@ -646,6 +647,99 @@ def checkItemCollision(player, item):
 def ShowplayerLives(playerLives):      
     for i in range(playerLives):                                                        
         SCREEN.blit(IMAGES['modilife'],(10+i*25,10))   
+
+#배경 선택 함수 추가(해령)
+def selectBackground():
+    select = 0
+    selected = False
+    
+    while not selected:
+        #배경 선택 텍스트 표시 
+        font = pygame.font.Font(None, 36)
+        title_text = font.render('Select Background', True, (255, 255, 255)) 
+        title_rect = title_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 6)) #텍스트 위치 설정
+        SCREEN.blit(title_text, title_rect) #화면에 텍스트 표시
+
+        #이미지 위치 설정
+        for i in range(len(BACKGROUNDS_LIST)):
+            background_image = pygame.image.load(BACKGROUNDS_LIST[i]) 
+            image_rect = background_image.get_rect(center=(SCREENWIDTH // 2 * (i + 1), SCREENHEIGHT // 2))
+            SCREEN.blit(background_image, image_rect)
+
+            #이미지 아래에 나타낼 텍스트 설정
+            font = pygame.font.Font(None, 22)
+            prompt_text = font.render(f'Press {i + 1}', True, (255, 255, 255))
+            prompt_rect = prompt_text.get_rect(center=(SCREENWIDTH // 4 * (i + 1) + 40, SCREENHEIGHT // 2 + 50))
+            SCREEN.blit(prompt_text, prompt_rect)
+
+        #화면 업데이트
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
+
+        #사용자에게 숫자로 배경 입력받음
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_1: select = 1
+                elif event.key == K_2: select = 2
+                
+                if select: 
+                    selected = True
+
+    return select - 1 
+
+
+#캐릭터 선택 함수 추가(해령)
+def selectPlayer():
+    select = 0
+    selected = False
+    
+    while not selected:
+        #캐릭터 선택 텍스트 표시 
+        font = pygame.font.Font(None, 36)
+        title_text = font.render('Select Player', True, (255, 255, 255)) 
+        title_rect = title_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 6)) 
+        SCREEN.blit(title_text, title_rect) 
+
+        #화면에 표시할 player 이미지들
+        player_images = [pygame.image.load(PLAYERS_LIST[0][1]).convert_alpha(),
+                            pygame.image.load(PLAYERS_LIST[1][1]).convert_alpha(),
+                            pygame.image.load(PLAYERS_LIST[2][1]).convert_alpha()]
+
+        #이미지 위치 설정
+        for i in range(len(player_images)):
+            player_image = player_images[i]
+            image_rect = player_image.get_rect(center=(SCREENWIDTH // 4 * (i + 1), SCREENHEIGHT // 2))
+            SCREEN.blit(player_image, image_rect)
+
+            #이미지 아래에 나타낼 텍스트 설정
+            font = pygame.font.Font(None, 22)
+            prompt_text = font.render(f'Press {i + 1}', True, (255, 255, 255))
+            prompt_rect = prompt_text.get_rect(center=(SCREENWIDTH // 4 * (i + 1), SCREENHEIGHT // 2 + 50))
+            SCREEN.blit(prompt_text, prompt_rect)
+
+        #화면 업데이트
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
+
+
+        #사용자에게 숫자로 캐릭터 입력받음
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_1: select = 1
+                elif event.key == K_2: select = 2
+                elif event.key == K_3: select = 3
+                
+                if select: 
+                    selected = True
+
+    return select - 1 
+
 
 if __name__ == '__main__':
     main()
