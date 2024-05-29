@@ -112,7 +112,7 @@ def main():
         SCREEN.blit(IMAGES['background'], (0,0))
 
         # select player sprites
-        inputPlayer = selectCharacter()
+        inputPlayer = selectPlayer()
         IMAGES['player'] = (
             pygame.image.load(PLAYERS_LIST[inputPlayer][0]).convert_alpha(),
             pygame.image.load(PLAYERS_LIST[inputPlayer][1]).convert_alpha(),
@@ -659,27 +659,27 @@ def selectBackground():
 
 
 #캐릭터 선택 함수 추가(해령)
-def selectCharacter():
+def selectPlayer():
     select = 0
     selected = False
     
     while not selected:
         #캐릭터 선택 텍스트 표시 
         font = pygame.font.Font(None, 36)
-        title_text = font.render('Select Character', True, (255, 255, 255)) 
+        title_text = font.render('Select Player', True, (255, 255, 255)) 
         title_rect = title_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 6)) 
         SCREEN.blit(title_text, title_rect) 
 
         #화면에 표시할 player 이미지들
-        character_images = [pygame.image.load(PLAYERS_LIST[0][1]).convert_alpha(),
+        player_images = [pygame.image.load(PLAYERS_LIST[0][1]).convert_alpha(),
                             pygame.image.load(PLAYERS_LIST[1][1]).convert_alpha(),
                             pygame.image.load(PLAYERS_LIST[2][1]).convert_alpha()]
 
         #이미지 위치 설정
-        for i in range(len(character_images)):
-            character_image = character_images[i]
-            image_rect = character_image.get_rect(center=(SCREENWIDTH // 4 * (i + 1), SCREENHEIGHT // 2))
-            SCREEN.blit(character_image, image_rect)
+        for i in range(len(player_images)):
+            player_image = player_images[i]
+            image_rect = player_image.get_rect(center=(SCREENWIDTH // 4 * (i + 1), SCREENHEIGHT // 2))
+            SCREEN.blit(player_image, image_rect)
 
             #이미지 아래에 나타낼 텍스트 설정
             font = pygame.font.Font(None, 22)
