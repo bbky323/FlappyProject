@@ -15,6 +15,11 @@ BASEY        = SCREENHEIGHT * 0.79 # 바닥의 높이
 # image, sound and hitmask  dicts
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
+# 난이도에 따라 파이프의 수평 간격 조절 (준영)
+EASY_PIPE_SPACING = 50
+HARD_PIPE_SPACING = 0
+pipeSpacing = EASY_PIPE_SPACING # 초기값을 easy로 설정
+
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
     # red bird
@@ -88,6 +93,9 @@ def main():
     item_image = pygame.image.load('assets/sprites/star.png').convert_alpha()
     item_size = (item_image.get_width() // 8, item_image.get_height() // 8)  # 이미지 크기 조절
     IMAGES['item'] = pygame.transform.scale(item_image, item_size)
+    #생명모양 하트 이미지 추가(영섭)
+    IMAGES['life'] = pygame.image.load('assets/sprites/life.png').convert_alpha()
+    IMAGES['modilife'] = pygame.transform.scale(IMAGES['life'], (20, 20)) 
     #콜론 이미지 추가 (승훈)
     colon_image = pygame.image.load('assets/sprites/colon.png').convert_alpha()
     colon_size = (colon_image.get_width() // 2, colon_image.get_height() // 3.5)
@@ -148,6 +156,7 @@ def main():
 
 def showWelcomeAnimation(): # 게임 시작 전 환영 화면
     """Shows welcome screen animation of flappy bird"""
+    global pipeSpacing
     # index of player to blit on screen
     playerIndex = 0
     playerIndexGen = cycle([0, 1, 2, 1]) # 새 날갯짓 순환
@@ -170,14 +179,41 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
     # player shm for up-down motion on welcome screen(상하 움직임 제어)
     playerShmVals = {'val': 0, 'dir': 1}
 
+    # pygame.font.init() # 난이도 설정하는 문구 표시 (준영)
+    pygame.font.init()
+    font = pygame.font.Font(None, 18)
+    text = "Press 'E' for Easy mode, 'H' for Hard mode"
+    shadow_color = (0, 0, 0)  # 검정색 그림자 생성
+    text_color = (255, 255, 255)  # 흰색 텍스트 설정
+    shadow_offset = 2  # 그림자의 오프셋
+
+    # 그림자 텍스트 생성, 위치 설정
+    shadow_surface = font.render(text, True, shadow_color)
+    shadow_rect = shadow_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81 + shadow_offset)) #글씨가 잘 안보이면 0.77로 수정 가능
+
+    # 실제 텍스트 생성, 위치 설정
+    text_surface = font.render(text, True, text_color)
+    text_rect = text_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81))
+
     while True:
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
+            
+            if event.type == KEYDOWN and event.key == K_e: # e key를 누르면 easy mode 로 게임 시작 (준영)
                 # make first flap sound and return values for mainGame
                 SOUNDS['wing'].play()
+                pipeSpacing = EASY_PIPE_SPACING
+                return {
+                    'playery': playery + playerShmVals['val'],
+                    'basex': basex,
+                    'playerIndexGen': playerIndexGen,
+                }
+            if event.type == KEYDOWN and event.key == K_h: # h key를 누르면 hard mode로 게임 시작
+                # make first flap sound and return values for mainGame
+                SOUNDS['wing'].play()
+                pipeSpacing = HARD_PIPE_SPACING
                 return {
                     'playery': playery + playerShmVals['val'],
                     'basex': basex,
@@ -198,6 +234,12 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
         SCREEN.blit(IMAGES['message'], (messagex, messagey))
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
 
+        # 텍스트의 정보 및 이미지를 게임화면에 나타냄
+        # 텍스트 그림자 그리기
+        SCREEN.blit(shadow_surface, shadow_rect)
+        # 실제 텍스트 그리기
+        SCREEN.blit(text_surface, text_rect)
+
         # 변경된 사항 게임에 반영
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -213,18 +255,18 @@ def mainGame(movementInfo):
 
     # get 2 new pipes to add to upperPipes lowerPipes list
     newPipe1 = getRandomPipe()
-    newPipe2 = getRandomPipe() 
+    newPipe2 = getRandomPipe()
 
     # list of upper pipes
     upperPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[0]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + pipeSpacing, 'y': newPipe2[0]['y']},
     ]
 
     # list of lowerpipe
     lowerPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[1]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + pipeSpacing, 'y': newPipe2[1]['y']},
     ]
 
     # 아이템 생성하는 코드, 아이템 생성 확률은 20%(기영)
@@ -245,7 +287,13 @@ def mainGame(movementInfo):
     playerRotThr  =  20   # rotation threshold
     playerFlapAcc =  -9   # players speed on flapping
     playerFlapped = False # True when player flaps
-
+    #목숨 추가, 무적 상태와 시간, 깜빡거림 상태와 빈도 프레임 단위(영섭)
+    playerLives         =   3   
+    invincible          = False 
+    blink_visible       = True                                                                    
+    invincible_duration =   30                                                                
+    blink_frequency     =   3                                                                    
+      
 
     while True:
         for event in pygame.event.get():# 게임 종료 이벤트
@@ -259,9 +307,26 @@ def mainGame(movementInfo):
                     SOUNDS['wing'].play()
 
         # check for crash here 충돌 검사
-        crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
+        if not invincible:    #무적이 아닌경우 충돌 무시(영섭)
+            crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},        
                                upperPipes, lowerPipes)
-        if crashTest[0]:
+            if crashTest[0]:            #충돌 시 (영섭)     
+                SOUNDS['hit'].play()    #충돌 소리 발생
+                playerLives -= 1        #목숨 감소
+                invincible = True       #무적 상태 활성화                              
+
+        else :
+            if invincible_duration % blink_frequency == 0:         #무적기간 / 무적빈도 의 값이 0일때만(영섭)
+                blink_visible = not blink_visible                  #not blink_visible으로 정의함으로써 true일땐 flase , false일땐 true로 변하여 밑의 조건문의 조건에 걸려서 깜빡거리도록함
+
+            invincible_duration -= 1                               #프레임마다 while문이 한번 씩 돌고 이때마다 1씩 감소
+            
+            if invincible_duration <= 0:                           #만약 남은 무적시간이 0보다 작다면 
+                invincible = False                                 #설정 값들 초기화(무적 해제, 무적시간 초기화, 깜빡거림 초기화)
+                invincible_duration = 30
+                blink_visible = True
+
+        if playerLives == 0:    #목숨이 0개라면 종료(영섭)
             return {
                 'y': playery,
                 'groundCrash': crashTest[1],
@@ -272,7 +337,7 @@ def mainGame(movementInfo):
                 'playerVelY': playerVelY,
                 'playerRot': playerRot
             }
-        
+
         # 아이템 충돌 확인 함수 추가(기영)
         if item and checkItemCollision({'x': playerx, 'y': playery, 'index': playerIndex}, item):
             score += 1
@@ -280,15 +345,16 @@ def mainGame(movementInfo):
             item = None
 
         # check for score
-        playerMidPos = playerx + IMAGES['player'][0].get_width() / 2
+        playerMidPos = playerx + IMAGES['player'][0].get_width() / 2 # 캐릭터의 중앙 위치 계산
         for pipe in upperPipes:
-            pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2
-            if pipeMidPos <= playerMidPos < pipeMidPos + 4: # 플레이어의 중심 위치가 파이프의 중심 위치를 통과했는지 확인
-                score += 1
+            pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2 # 파이프의 중앙 위치 계산
+            if pipeMidPos < playerMidPos and not pipe.get('scored', False): # 캐릭터가 파이프의 중심을 지났는지 체크, 해당 파이프를 통과했을때 점수를 계산했는지 체크.
+                score += 1 #위 조건을 모두 만족할때 점수를 1 올림
+                pipe['scored'] = True  # 점수가 계산되면 True로 설정, 해당 파이프에 대해 점수가 계산되는 것 방지
                 SOUNDS['point'].play()
                 if random.random() < item_spawn_chance: #확률 로직 추가(기영)
                     item = getRandomItem(lowerPipes, upperPipes, playerx)
-
+ 
         # playerIndex basex change
         if (loopIter + 1) % 3 == 0:
             playerIndex = next(playerIndexGen)
@@ -317,10 +383,11 @@ def mainGame(movementInfo):
             lPipe['x'] += pipeVelX
 
         # add new pipe when first pipe is about to touch left of screen, 파이프 생성
-        if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5:
+        if 0 < len(upperPipes) and upperPipes[-1]['x'] < SCREENWIDTH - (SCREENWIDTH / 2 + pipeSpacing): # 파이프 개수에 상관 없이 마지막 파이프가 화면 중간을 넘어설때 새 파이프 추가
             newPipe = getRandomPipe()
-            upperPipes.append(newPipe[0])
-            lowerPipes.append(newPipe[1])
+            newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + pipeSpacing
+            upperPipes.append({'x': newPipeX, 'y': newPipe[0]['y'], 'scored': False})  # 새 파이프에 scored : False 속성 추가. 캐릭터가 해당 파이프를 지나게 될때 점수를 체크 하고 True로 변환
+            lowerPipes.append({'x': newPipeX, 'y': newPipe[1]['y']})
 
         # remove first pipe if its out of the screen, 파이프 제거
         if len(upperPipes) > 0 and upperPipes[0]['x'] < -IMAGES['pipe'][0].get_width():
@@ -342,9 +409,10 @@ def mainGame(movementInfo):
         visibleRot = playerRotThr
         if playerRot <= playerRotThr:
             visibleRot = playerRot
-        
-        playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], visibleRot)
-        SCREEN.blit(playerSurface, (playerx, playery))
+        #blink_visible 상태라면 이미지가 나타나지않도록 하는 조건문(영섭)
+        if blink_visible : 
+            playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], visibleRot)
+            SCREEN.blit(playerSurface, (playerx, playery))
 
         # 아이템 그리기 추가(기영)
         if item:
@@ -353,6 +421,9 @@ def mainGame(movementInfo):
                 item = None
             else:
                 SCREEN.blit(IMAGES['item'], (item['x'], item['y']))
+
+        #목숨 개수 표시(영섭)
+        ShowplayerLives(playerLives)
 
         # 화면 업데이트 및 프레임 속도 조절
         pygame.display.update()
@@ -427,6 +498,7 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
         FPSCLOCK.tick(FPS)
         pygame.display.update()
 
+
 # 아이템을 생성하는 함수 추가(기영)
 def getRandomItem(lowerPipes, upperPipes, playerx):
     """returns a randomly generated item between the pipes"""
@@ -437,8 +509,8 @@ def getRandomItem(lowerPipes, upperPipes, playerx):
     
     # Generate an item between the pipes
     itemX = max(lowerPipe['x'], playerx + 50) + 50 # 항상 아이템을 캐릭터보다 앞에, 파이프 사이에 위치
-    itemY = random.randint(upperPipe['y'] + IMAGES['pipe'][0].get_height() + PIPEGAPSIZE / 2,
-                           lowerPipe['y'] - PIPEGAPSIZE / 2)  # y좌표는 항상 위 파이프와 아래 파이프 사이에 나오도록 설정
+    itemY = random.randint(int(upperPipe['y'] + IMAGES['pipe'][0].get_height() + PIPEGAPSIZE / 2),
+                           int(lowerPipe['y'] - PIPEGAPSIZE / 2))  # y좌표는 항상 위 파이프와 아래 파이프 사이에 나오도록 설정
     
     return {'x': itemX, 'y': itemY}
 
@@ -475,14 +547,16 @@ def playerShm(playerShm):
 
 
 def getRandomPipe():
+    """returns a randomly generated pipe"""
+    # y of gap between upper and lower pipe
     gapY = random.randrange(0, int(BASEY * 0.6 - PIPEGAPSIZE))
     gapY += int(BASEY * 0.2)
     pipeHeight = IMAGES['pipe'][0].get_height()
     pipeX = SCREENWIDTH + 10
 
     return [
-        {'x': pipeX, 'y': gapY - pipeHeight},
-        {'x': pipeX, 'y': gapY + PIPEGAPSIZE},
+        {'x': pipeX, 'y': gapY - pipeHeight},  # upper pipe
+        {'x': pipeX, 'y': gapY + PIPEGAPSIZE}, # lower pipe
     ]
 
 
@@ -568,6 +642,10 @@ def checkItemCollision(player, item):
     itemRect = pygame.Rect(item['x'], item['y'], IMAGES['item'].get_width(), IMAGES['item'].get_height())
     return playerRect.colliderect(itemRect)
 
+#목숨의 개수를 보여주는 함수 추가(영섭)
+def ShowplayerLives(playerLives):      
+    for i in range(playerLives):                                                        
+        SCREEN.blit(IMAGES['modilife'],(10+i*25,10))   
 
 if __name__ == '__main__':
     main()
