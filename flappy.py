@@ -183,18 +183,18 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
     # pygame.font.init() # 난이도 설정하는 문구 표시 (준영)
     pygame.font.init()
     font = pygame.font.Font(None, 18)
-    text = "Press 'E' for Easy mode, 'H' for Hard mode"
+    text = "Press 'E' for Easy mode, 'H' for Hard mode" # 난이도 선택 문구
     shadow_color = (0, 0, 0)  # 검정색 그림자 생성
     text_color = (255, 255, 255)  # 흰색 텍스트 설정
     shadow_offset = 2  # 그림자의 오프셋
 
     # 그림자 텍스트 생성, 위치 설정
     shadow_surface = font.render(text, True, shadow_color)
-    shadow_rect = shadow_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81 + shadow_offset)) #글씨가 잘 안보이면 0.77로 수정 가능
+    shadow_rect = shadow_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.77 + shadow_offset)) # 기존 0.81
 
     # 실제 텍스트 생성, 위치 설정
     text_surface = font.render(text, True, text_color)
-    text_rect = text_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.81))
+    text_rect = text_surface.get_rect(center=(SCREENWIDTH / 2, SCREENHEIGHT * 0.77))
 
     while True:
         for event in pygame.event.get():
@@ -258,10 +258,10 @@ def mainGame(movementInfo):
     newPipe1 = getRandomPipe()
     newPipe2 = getRandomPipe()
 
-    # list of upper pipes
+    # list of upper pipes, 위 아래 파이프의 생성 간격을 난이도 설정에 따라 더함.
     upperPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[0]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + pipeSpacing, 'y': newPipe2[0]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2) + pipeSpacing, 'y': newPipe2[0]['y']}, 
     ]
 
     # list of lowerpipe
@@ -349,7 +349,7 @@ def mainGame(movementInfo):
         playerMidPos = playerx + IMAGES['player'][0].get_width() / 2 # 캐릭터의 중앙 위치 계산
         for pipe in upperPipes:
             pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2 # 파이프의 중앙 위치 계산
-            if pipeMidPos < playerMidPos and not pipe.get('scored', False): # 캐릭터가 파이프의 중심을 지났는지 체크, 해당 파이프를 통과했을때 점수를 계산했는지 체크.
+            if pipeMidPos < playerMidPos and not pipe.get('scored', False): # 캐릭터가 파이프의 중심을 지났는지 체크, 해당 파이프를 통과했을때 점수를 계산했는지 체크.(파이프에 scored 속성 추가, 준영)
                 score += 1 #위 조건을 모두 만족할때 점수를 1 올림
                 pipe['scored'] = True  # 점수가 계산되면 True로 설정, 해당 파이프에 대해 점수가 계산되는 것 방지
                 SOUNDS['point'].play()
@@ -383,7 +383,7 @@ def mainGame(movementInfo):
             uPipe['x'] += pipeVelX
             lPipe['x'] += pipeVelX
 
-        # add new pipe when first pipe is about to touch left of screen, 파이프 생성
+        # add new pipe when first pipe is about to touch left of screen, 파이프 생성 조건 수정(준영)
         if 0 < len(upperPipes) and upperPipes[-1]['x'] < SCREENWIDTH - (SCREENWIDTH / 2 + pipeSpacing): # 파이프 개수에 상관 없이 마지막 파이프가 화면 중간을 넘어설때 새 파이프 추가
             newPipe = getRandomPipe()
             newPipeX = upperPipes[-1]['x'] + SCREENWIDTH / 2 + pipeSpacing
