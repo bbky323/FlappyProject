@@ -363,14 +363,16 @@ def mainGame(movementInfo):
 
         # check for score
         playerMidPos = playerx + IMAGES['player'][0].get_width() / 2 # 캐릭터의 중앙 위치 계산
+        playerMidY = playery + IMAGES['player'][0].get_height() / 2 # 캐릭터의 y축 중앙 계산(기영)
         for pipe in upperPipes:
             pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2 # 파이프의 중앙 위치 계산
             if pipeMidPos < playerMidPos and not pipe.get('scored', False): # 캐릭터가 파이프의 중심을 지났는지 체크, 해당 파이프를 통과했을때 점수를 계산했는지 체크.(파이프에 scored 속성 추가, 준영)
-                score += 1 #위 조건을 모두 만족할때 점수를 1 올림
-                pipe['scored'] = True  # 점수가 계산되면 True로 설정, 해당 파이프에 대해 점수가 계산되는 것 방지
-                SOUNDS['point'].play()
-                if random.random() < item_spawn_chance: #확률 로직 추가(기영)
-                    item = getRandomItem(lowerPipes, upperPipes, playerx)
+                if upperPipes[0]['y'] + IMAGES['pipe'][0].get_height() < playerMidY < lowerPipes[0]['y']: #y축 기준 추가(기영)
+                    score += 1 #위 조건을 모두 만족할때 점수를 1 올림
+                    pipe['scored'] = True  # 점수가 계산되면 True로 설정, 해당 파이프에 대해 점수가 계산되는 것 방지
+                    SOUNDS['point'].play()
+                    if random.random() < item_spawn_chance: #확률 로직 추가(기영)
+                        item = getRandomItem(lowerPipes, upperPipes, playerx)
  
         # playerIndex basex change
         if (loopIter + 1) % 3 == 0:
