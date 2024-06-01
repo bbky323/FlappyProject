@@ -20,6 +20,9 @@ EASY_PIPE_SPACING = 50
 HARD_PIPE_SPACING = 0
 pipeSpacing = EASY_PIPE_SPACING # 초기값을 easy로 설정
 
+#일시정지 상태 저장 변수(승재)
+paused = False
+
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
     # red bird
@@ -247,6 +250,8 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
 
 
 def mainGame(movementInfo):
+    global paused #일시정지 상태 전역변수 선언 (승재)
+    
     score = playerIndex = loopIter = 0 #점수, 플레이어 인덱스, 루프 반복자 초기화
     playerIndexGen = movementInfo['playerIndexGen']
     playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
@@ -294,19 +299,30 @@ def mainGame(movementInfo):
     blink_visible       = True                                                                    
     invincible_duration =   30                                                                
     blink_frequency     =   3                                                                    
-      
+    
+    #일시정지 상태 변수 초기화(승재)
+    paused = False
 
     while True:
         for event in pygame.event.get():# 게임 종료 이벤트
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
+            
+            #일시정지 이벤트 처리(승재)
+            if event.type == KEYDOWN and event.key == K_p:
+                paused = not paused
+                
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP): # 키 다운 이벤트
                 if playery > -2 * IMAGES['player'][0].get_height():
                     playerVelY = playerFlapAcc
                     playerFlapped = True
                     SOUNDS['wing'].play()
-
+        
+        #일시정지가 되면 뒤의 게임 로직은 무시됨(승재)
+        if paused:
+            continue
+        
         # check for crash here 충돌 검사
         if not invincible:    #무적이 아닌경우 충돌 무시(영섭)
             crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},        
@@ -739,6 +755,25 @@ def selectPlayer():
                     selected = True
 
     return select - 1 
+
+#일시정지 함수 추가(승재)
+def pauseGame():
+    global paused
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_p:  # 'p' 키를 누르면 일시정지 해제
+                    paused = False
+        font = pygame.font.Font(None, 36)
+        paused_text = font.render('일시정지', True, (255, 255, 255)) 
+        paused_rect = paused_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 2)) 
+        SCREEN.blit(paused_text, paused_rect) 
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
 
 
 if __name__ == '__main__':
