@@ -20,6 +20,9 @@ EASY_PIPE_SPACING = 50
 HARD_PIPE_SPACING = 0
 pipeSpacing = EASY_PIPE_SPACING # 초기값을 easy로 설정
 
+#일시정지 상태 저장 변수(승재)
+paused = False
+
 # list of all possible players (tuple of 3 positions of flap)
 PLAYERS_LIST = (
     # red bird
@@ -62,7 +65,7 @@ except NameError:
 
 
 def main():
-    global SCREEN, FPSCLOCK, startTime      #시작시간 측정을 위한 전역변수 선언 (승훈)
+    global SCREEN, FPSCLOCK, startTime     #시작시간 측정을 위한 전역변수 선언 (승훈)
     pygame.init() # Pygame 라이브러리 초기화
     FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
@@ -247,6 +250,8 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
 
 
 def mainGame(movementInfo):
+    global paused, pauseTime #일시정지 상태 전역변수 선언 (승재), 일시정지 시간 측정하기 위한 전역변수(승훈)
+    
     score = playerIndex = loopIter = 0 #점수, 플레이어 인덱스, 루프 반복자 초기화
     playerIndexGen = movementInfo['playerIndexGen']
     playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
@@ -294,19 +299,37 @@ def mainGame(movementInfo):
     blink_visible       = True                                                                    
     invincible_duration =   30                                                                
     blink_frequency     =   3                                                                    
-      
+    
+    #일시정지 상태 변수 초기화(승재)
+    paused = False
+    #일시정지 시간 값은 int형 자료로 저장함(승훈)
+    pauseTime = 0
 
     while True:
         for event in pygame.event.get():# 게임 종료 이벤트
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
+            
+            #일시정지 이벤트 처리(승재)
+            if (event.type == KEYDOWN and event.key == K_p):
+                if paused == False:                                     #일시정지가 된 시점으로부터 시간 측정(승훈)
+                    pauseTimecheck = time.time()
+                elif paused == True:
+                    pauseTime += round(time.time() - pauseTimecheck)
+
+                paused = not paused
+            
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP): # 키 다운 이벤트
                 if playery > -2 * IMAGES['player'][0].get_height():
                     playerVelY = playerFlapAcc
                     playerFlapped = True
                     SOUNDS['wing'].play()
-
+        
+        #일시정지가 되면 뒤의 게임 로직은 무시됨(승재)
+        if paused:
+            continue
+        
         # check for crash here 충돌 검사
         if not invincible:    #무적이 아닌경우 충돌 무시(영섭)
             crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},        
@@ -347,14 +370,16 @@ def mainGame(movementInfo):
 
         # check for score
         playerMidPos = playerx + IMAGES['player'][0].get_width() / 2 # 캐릭터의 중앙 위치 계산
+        playerMidY = playery + IMAGES['player'][0].get_height() / 2 # 캐릭터의 y축 중앙 계산(기영)
         for pipe in upperPipes:
             pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2 # 파이프의 중앙 위치 계산
             if pipeMidPos < playerMidPos and not pipe.get('scored', False): # 캐릭터가 파이프의 중심을 지났는지 체크, 해당 파이프를 통과했을때 점수를 계산했는지 체크.(파이프에 scored 속성 추가, 준영)
-                score += 1 #위 조건을 모두 만족할때 점수를 1 올림
-                pipe['scored'] = True  # 점수가 계산되면 True로 설정, 해당 파이프에 대해 점수가 계산되는 것 방지
-                SOUNDS['point'].play()
-                if random.random() < item_spawn_chance: #확률 로직 추가(기영)
-                    item = getRandomItem(lowerPipes, upperPipes, playerx)
+                if upperPipes[0]['y'] + IMAGES['pipe'][0].get_height() < playerMidY < lowerPipes[0]['y']: #y축 기준 추가(기영)
+                    score += 1 #위 조건을 모두 만족할때 점수를 1 올림
+                    pipe['scored'] = True  # 점수가 계산되면 True로 설정, 해당 파이프에 대해 점수가 계산되는 것 방지
+                    SOUNDS['point'].play()
+                    if random.random() < item_spawn_chance: #확률 로직 추가(기영)
+                        item = getRandomItem(lowerPipes, upperPipes, playerx)
  
         # playerIndex basex change
         if (loopIter + 1) % 3 == 0:
@@ -451,7 +476,7 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
     SOUNDS['hit'].play()
 
     # 게임 시간 출력
-    playTime = time.time() - startTime  #시작부터 게임 오버까지 플레이한 시간을 저장함 (승훈)
+    playTime = int((time.time() - startTime) - pauseTime)  #시작부터 게임 오버까지 플레이한 시간을 저장함 (승훈)
 
     while True:
         for event in pygame.event.get():
@@ -518,10 +543,10 @@ def getRandomItem(lowerPipes, upperPipes, playerx):
 #플레이 시간 출력해주는 함수 (승훈)
 def playTimecheck(playTime):                            # 'MM' 'SS'로 출력하기 위해 리스트에 시간값을 다 분해함
     timeArr = [
-        int((playTime // 60) // 10), 
-        int((playTime // 60) % 10), 
-        int((playTime % 60) // 10), 
-        int((playTime % 60) % 10)
+        ((playTime // 60) // 10), 
+        ((playTime // 60) % 10), 
+        ((playTime % 60) // 10), 
+        ((playTime % 60) % 10)
     ]
 
     x_offset = SCREENWIDTH // 2 - 75                                    #x위치 최적 75
@@ -741,6 +766,25 @@ def selectPlayer():
                     selected = True
 
     return select - 1 
+
+#일시정지 함수 추가(승재)
+def pauseGame():
+    global paused
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_p:  # 'p' 키를 누르면 일시정지 해제
+                    paused = False
+        font = pygame.font.Font(None, 36)
+        paused_text = font.render('일시정지', True, (255, 255, 255)) 
+        paused_rect = paused_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 2)) 
+        SCREEN.blit(paused_text, paused_rect) 
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
 
 
 if __name__ == '__main__':
