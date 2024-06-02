@@ -65,7 +65,7 @@ except NameError:
 
 
 def main():
-    global SCREEN, FPSCLOCK, startTime      #시작시간 측정을 위한 전역변수 선언 (승훈)
+    global SCREEN, FPSCLOCK, startTime     #시작시간 측정을 위한 전역변수 선언 (승훈)
     pygame.init() # Pygame 라이브러리 초기화
     FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
@@ -250,7 +250,7 @@ def showWelcomeAnimation(): # 게임 시작 전 환영 화면
 
 
 def mainGame(movementInfo):
-    global paused #일시정지 상태 전역변수 선언 (승재)
+    global paused, pauseTime #일시정지 상태 전역변수 선언 (승재), 일시정지 시간 측정하기 위한 전역변수(승훈)
     
     score = playerIndex = loopIter = 0 #점수, 플레이어 인덱스, 루프 반복자 초기화
     playerIndexGen = movementInfo['playerIndexGen']
@@ -302,6 +302,8 @@ def mainGame(movementInfo):
     
     #일시정지 상태 변수 초기화(승재)
     paused = False
+    #일시정지 시간 값은 int형 자료로 저장함(승훈)
+    pauseTime = 0
 
     while True:
         for event in pygame.event.get():# 게임 종료 이벤트
@@ -310,9 +312,14 @@ def mainGame(movementInfo):
                 sys.exit()
             
             #일시정지 이벤트 처리(승재)
-            if event.type == KEYDOWN and event.key == K_p:
+            if (event.type == KEYDOWN and event.key == K_p):
+                if paused == False:                                     #일시정지가 된 시점으로부터 시간 측정(승훈)
+                    pauseTimecheck = time.time()
+                elif paused == True:
+                    pauseTime += round(time.time() - pauseTimecheck)
+
                 paused = not paused
-                
+            
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP): # 키 다운 이벤트
                 if playery > -2 * IMAGES['player'][0].get_height():
                     playerVelY = playerFlapAcc
@@ -469,7 +476,7 @@ def showGameOverScreen(crashInfo): # 게임 오버 화면
     SOUNDS['hit'].play()
 
     # 게임 시간 출력
-    playTime = time.time() - startTime  #시작부터 게임 오버까지 플레이한 시간을 저장함 (승훈)
+    playTime = int((time.time() - startTime) - pauseTime)  #시작부터 게임 오버까지 플레이한 시간을 저장함 (승훈)
 
     while True:
         for event in pygame.event.get():
@@ -536,10 +543,10 @@ def getRandomItem(lowerPipes, upperPipes, playerx):
 #플레이 시간 출력해주는 함수 (승훈)
 def playTimecheck(playTime):                            # 'MM' 'SS'로 출력하기 위해 리스트에 시간값을 다 분해함
     timeArr = [
-        int((playTime // 60) // 10), 
-        int((playTime // 60) % 10), 
-        int((playTime % 60) // 10), 
-        int((playTime % 60) % 10)
+        ((playTime // 60) // 10), 
+        ((playTime // 60) % 10), 
+        ((playTime % 60) // 10), 
+        ((playTime % 60) % 10)
     ]
 
     x_offset = SCREENWIDTH // 2 - 75                                    #x위치 최적 75
@@ -551,7 +558,9 @@ def playTimecheck(playTime):                            # 'MM' 'SS'로 출력하
             x_offset += int(IMAGES['colon'].get_width()) + 10
         
         SCREEN.blit(IMAGES['numbers'][seg], (x_offset, y_offset))
-        x_offset += int(IMAGES['numbers'][seg].get_width()) + 10   
+        x_offset += int(IMAGES['numbers'][seg].get_width()) + 10
+        
+        print(coln, seg)
 
 
 def playerShm(playerShm):
