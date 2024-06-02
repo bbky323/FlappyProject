@@ -319,6 +319,8 @@ def mainGame(movementInfo):
                     pauseTime += round(time.time() - pauseTimecheck)
 
                 paused = not paused
+                if paused:  # 일시정지 상태가 되면 pauseGame 함수를 호출
+                    pauseGame()
             
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP): # 키 다운 이벤트
                 if playery > -2 * IMAGES['player'][0].get_height():
@@ -372,8 +374,9 @@ def mainGame(movementInfo):
         playerMidPos = playerx + IMAGES['player'][0].get_width() / 2 # 캐릭터의 중앙 위치 계산
         playerMidY = playery + IMAGES['player'][0].get_height() / 2 # 캐릭터의 y축 중앙 계산(기영)
         for pipe in upperPipes:
-            pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2 # 파이프의 중앙 위치 계산
-            if pipeMidPos < playerMidPos and not pipe.get('scored', False): # 캐릭터가 파이프의 중심을 지났는지 체크, 해당 파이프를 통과했을때 점수를 계산했는지 체크.(파이프에 scored 속성 추가, 준영)
+            pipeMidPosleft = pipe['x'] # 파이프의 왼쪽 끝 좌표
+            pipeMidPosright = pipe['x'] + IMAGES['pipe'][0].get_width() # 파이프의 오른쪽 좌표
+            if pipeMidPosleft < playerMidPos <pipeMidPosright and not pipe.get('scored', False): # 캐릭터가 파이프를 지났는지 체크, 해당 파이프를 통과했을때 점수를 계산했는지 체크.(파이프에 scored 속성 추가, 준영)
                 if upperPipes[0]['y'] + IMAGES['pipe'][0].get_height() < playerMidY < lowerPipes[0]['y']: #y축 기준 추가(기영)
                     score += 1 #위 조건을 모두 만족할때 점수를 1 올림
                     pipe['scored'] = True  # 점수가 계산되면 True로 설정, 해당 파이프에 대해 점수가 계산되는 것 방지
@@ -769,6 +772,10 @@ def selectPlayer():
 def pauseGame():
     global paused
     paused = True
+    font = pygame.font.Font(None, 36)
+    paused_text = font.render('PAUSE', True, (255, 255, 255)) 
+    paused_rect = paused_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 2)) 
+    
     while paused:
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -777,9 +784,6 @@ def pauseGame():
             elif event.type == KEYDOWN:
                 if event.key == K_p:  # 'p' 키를 누르면 일시정지 해제
                     paused = False
-        font = pygame.font.Font(None, 36)
-        paused_text = font.render('일시정지', True, (255, 255, 255)) 
-        paused_rect = paused_text.get_rect(center=(SCREENWIDTH // 2, SCREENHEIGHT // 2)) 
         SCREEN.blit(paused_text, paused_rect) 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
