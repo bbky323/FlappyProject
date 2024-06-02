@@ -559,8 +559,6 @@ def playTimecheck(playTime):                            # 'MM' 'SS'로 출력하
         
         SCREEN.blit(IMAGES['numbers'][seg], (x_offset, y_offset))
         x_offset += int(IMAGES['numbers'][seg].get_width()) + 10
-        
-        print(coln, seg)
 
 
 def playerShm(playerShm):
