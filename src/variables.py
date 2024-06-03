@@ -1,3 +1,6 @@
+import pygame
+import time # 시간 측정을 위해 사용(승훈)
+
 FPS = 30 # 게임의 프레임 설정
 SCREENWIDTH  = 288 # 화면 너비
 SCREENHEIGHT = 512 # 화면 높
@@ -53,3 +56,8 @@ try:
     xrange
 except NameError:
     xrange = range
+
+#기존에 전역변수였던 변수들
+FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
+SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
+startTime = time.time()     #시작시간 측정을 위한 전역변수 선언 (승훈)
