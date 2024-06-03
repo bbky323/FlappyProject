@@ -1,77 +1,11 @@
+import sys # 게임 종료 시킬 때 사용
 from itertools import cycle # 반복 가능하게, 예를 들면 새의 날갯짓
 import random
-import time # 시간 측정을 위해 사용(승훈)
-import sys # 게임 종료 시킬 때 사용
 import pygame
 from pygame.locals import * # pygame 사용 시 입력 및 이벤트 관리
+from variables import *
 
-
-
-FPS = 30 # 게임의 프레임 설정
-SCREENWIDTH  = 288 # 화면 너비
-SCREENHEIGHT = 512 # 화면 높
-PIPEGAPSIZE  = 100 # 파이프 사이 간격
-BASEY        = SCREENHEIGHT * 0.79 # 바닥의 높이
-# image, sound and hitmask  dicts
-IMAGES, SOUNDS, HITMASKS = {}, {}, {}
-
-# 난이도에 따라 파이프의 수평 간격 조절 (준영)
-EASY_PIPE_SPACING = 50
-HARD_PIPE_SPACING = 0
-pipeSpacing = EASY_PIPE_SPACING # 초기값을 easy로 설정
-
-#일시정지 상태 저장 변수(승재)
-paused = False
-
-# list of all possible players (tuple of 3 positions of flap)
-PLAYERS_LIST = (
-    # red bird
-    (
-        'assets/sprites/redbird-upflap.png',
-        'assets/sprites/redbird-midflap.png',
-        'assets/sprites/redbird-downflap.png',
-    ),
-    # blue bird
-    (
-        'assets/sprites/bluebird-upflap.png',
-        'assets/sprites/bluebird-midflap.png',
-        'assets/sprites/bluebird-downflap.png',
-    ),
-    # yellow bird
-    (
-        'assets/sprites/yellowbird-upflap.png',
-        'assets/sprites/yellowbird-midflap.png',
-        'assets/sprites/yellowbird-downflap.png',
-    ),
-)
-
-# list of backgrounds
-BACKGROUNDS_LIST = (
-    'assets/sprites/background-day.png',
-    'assets/sprites/background-night.png',
-)
-
-# list of pipes
-PIPES_LIST = (
-    'assets/sprites/pipe-green.png',
-    'assets/sprites/pipe-red.png',
-)
-
-
-try:
-    xrange
-except NameError:
-    xrange = range
-
-
-def main():
-    global SCREEN, FPSCLOCK, startTime     #시작시간 측정을 위한 전역변수 선언 (승훈)
-    pygame.init() # Pygame 라이브러리 초기화
-    FPSCLOCK = pygame.time.Clock() # Pygame 시계 객체, 프레임 속도를 제어
-    SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Pygame 화면 객체, 창의 픽셀 크기 정의
-    pygame.display.set_caption('Flappy Bird') # 게임 창의 상단에 표시될 제목
-    
-
+def load_assets():
     # numbers sprites for score display, convert_alpha()를 사용하여 이미지 객체로 변환, 투명도 관리
     IMAGES['numbers'] = (
         pygame.image.load('assets/sprites/0.png').convert_alpha(),
@@ -115,48 +49,6 @@ def main():
     SOUNDS['point']  = pygame.mixer.Sound('assets/audio/point' + soundExt)
     SOUNDS['swoosh'] = pygame.mixer.Sound('assets/audio/swoosh' + soundExt)
     SOUNDS['wing']   = pygame.mixer.Sound('assets/audio/wing' + soundExt)
-
-    while True:
-        # select background sprites
-        inputBackground = selectBackground()
-        IMAGES['background'] = pygame.image.load(BACKGROUNDS_LIST[inputBackground]).convert()
-        SCREEN.blit(IMAGES['background'], (0,0))
-
-        # select player sprites
-        inputPlayer = selectPlayer()
-        IMAGES['player'] = (
-            pygame.image.load(PLAYERS_LIST[inputPlayer][0]).convert_alpha(),
-            pygame.image.load(PLAYERS_LIST[inputPlayer][1]).convert_alpha(),
-            pygame.image.load(PLAYERS_LIST[inputPlayer][2]).convert_alpha(),
-        )
-
-        # select random pipe sprites
-        pipeindex = random.randint(0, len(PIPES_LIST) - 1)
-        IMAGES['pipe'] = (
-            pygame.transform.flip(
-                pygame.image.load(PIPES_LIST[pipeindex]).convert_alpha(), False, True),
-            pygame.image.load(PIPES_LIST[pipeindex]).convert_alpha(),
-        )
-
-        # hitmask for pipes
-        HITMASKS['pipe'] = (
-            getHitmask(IMAGES['pipe'][0]),
-            getHitmask(IMAGES['pipe'][1]),
-        )
-
-        # hitmask for player
-        HITMASKS['player'] = (
-            getHitmask(IMAGES['player'][0]),
-            getHitmask(IMAGES['player'][1]),
-            getHitmask(IMAGES['player'][2]),
-        )
-        
-        startTime = time.time()
-
-        movementInfo = showWelcomeAnimation()
-        crashInfo = mainGame(movementInfo)
-        showGameOverScreen(crashInfo)
-
 
 def showWelcomeAnimation(): # 게임 시작 전 환영 화면
     """Shows welcome screen animation of flappy bird"""
@@ -715,7 +607,6 @@ def selectBackground():
                 
                 if select: 
                     selected = True
-
     return select - 1 
 
 
@@ -787,7 +678,3 @@ def pauseGame():
         SCREEN.blit(paused_text, paused_rect) 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-
-
-if __name__ == '__main__':
-    main()
