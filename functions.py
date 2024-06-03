@@ -1,9 +1,9 @@
-from variables import *
 import sys # 게임 종료 시킬 때 사용
 from itertools import cycle # 반복 가능하게, 예를 들면 새의 날갯짓
 import random
 import pygame
 from pygame.locals import * # pygame 사용 시 입력 및 이벤트 관리
+from variables import *
 
 def load_assets():
     # numbers sprites for score display, convert_alpha()를 사용하여 이미지 객체로 변환, 투명도 관리
@@ -607,7 +607,6 @@ def selectBackground():
                 
                 if select: 
                     selected = True
-
     return select - 1 
 
 
